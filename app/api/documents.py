@@ -47,6 +47,9 @@ def to_dict(doc: Document) -> dict[str, Any]:
         "processed_at": doc.processed_at.isoformat() if doc.processed_at else None,
         "error": doc.error,
         "text": doc.text,
+        "summary": doc.summary,
+        "document_type": doc.document_type,
+        "keywords": doc.keywords,
     }
 
 
@@ -160,6 +163,9 @@ async def upload_document(
         created_at=now_utc_naive(),
         processed_at=None,
         text=None,
+        summary=None,
+        document_type=None,
+        keywords=None,
         error=None,
     )
     db.add(doc)

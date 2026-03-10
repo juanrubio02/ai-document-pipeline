@@ -1,0 +1,1 @@
+Este es un documento nuevo. Tiene varias frases. Queremos validar el summary correctamente. Esta es la tercera frase del texto.

@@ -18,4 +18,7 @@ class DocumentOut(BaseModel):
     created_at: datetime
     processed_at: datetime | None
     text: str | None
+    summary: str | None
+    document_type: str | None
+    keywords: str | None
     error: str | None

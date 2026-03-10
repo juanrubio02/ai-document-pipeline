@@ -8,6 +8,8 @@ from sqlalchemy.orm import Session
 
 from app.db.session import SessionLocal
 from app.db.models import Document
+from app.services.ai_enrichment import detect_document_type, extract_keywords
+from app.services.ai_summary import generate_summary
 from app.services.extractors import extract_text_from_file
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
@@ -50,8 +52,28 @@ def process_document(document_id: str) -> None:
             filename=doc.filename,
             content_type=doc.content_type,
         )
+        summary: str | None = None
+        document_type: str | None = None
+        keywords: str | None = None
+        if text:
+            try:
+                summary = generate_summary(text)
+            except Exception:
+                # Summary generation must not break the pipeline.
+                summary = None
+            try:
+                document_type = detect_document_type(doc.filename, doc.content_type, text)
+                extracted_keywords = extract_keywords(text)
+                keywords = ", ".join(extracted_keywords) if extracted_keywords else None
+            except Exception:
+                # Enrichment must not break the pipeline.
+                document_type = None
+                keywords = None
 
         doc.text = text
+        doc.summary = summary
+        doc.document_type = document_type
+        doc.keywords = keywords
         doc.status = "DONE"
         doc.processed_at = now_utc_naive()
         db.commit()

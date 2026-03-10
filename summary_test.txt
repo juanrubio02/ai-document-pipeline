@@ -1,0 +1,1 @@
+Este es un documento nuevo. Tiene varias frases. Sirve para probar el summary automático del pipeline.

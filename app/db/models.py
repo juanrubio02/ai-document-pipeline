@@ -22,4 +22,7 @@ class Document(Base):
     processed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    document_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    keywords: Mapped[str | None] = mapped_column(Text, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
