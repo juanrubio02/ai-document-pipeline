@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Document Pipeline</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="app-bg"></div>
+  <div class="layout">
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-dot"></span>
+        <span>AI Document Pipeline</span>
+      </a>
+      <nav class="topnav">
+        <a href="/">Inicio</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

@@ -14,7 +14,8 @@ class Document(Base):
 
     document_id: Mapped[str] = mapped_column(String(32), primary_key=True)
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
-    storage_path: Mapped[str] = mapped_column(String(500), nullable=False)  # NEW
+    checksum: Mapped[str | None] = mapped_column(String(64), nullable=True, unique=True)
+    storage_path: Mapped[str] = mapped_column(String(500), nullable=False)
     content_type: Mapped[str] = mapped_column(String(100), nullable=False)
     status: Mapped[str] = mapped_column(String(16), nullable=False)  # PENDING|PROCESSING|DONE|FAILED
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)

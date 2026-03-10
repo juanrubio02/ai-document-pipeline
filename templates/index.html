@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="card">
+  <div class="section-head">
+    <h2>Pipeline Stats</h2>
+    <span class="chip">Success {{ "%.1f"|format(stats.success_rate * 100) }}%</span>
+  </div>
+  <div class="meta-grid">
+    <div class="meta-item"><span class="k">Total documents</span><span class="v">{{ stats.total_documents }}</span></div>
+    <div class="meta-item"><span class="k">DONE</span><span class="v">{{ stats.by_status.DONE }}</span></div>
+    <div class="meta-item"><span class="k">FAILED</span><span class="v">{{ stats.by_status.FAILED }}</span></div>
+    <div class="meta-item"><span class="k">PROCESSING</span><span class="v">{{ stats.by_status.PROCESSING }}</span></div>
+    <div class="meta-item"><span class="k">PENDING</span><span class="v">{{ stats.by_status.PENDING }}</span></div>
+  </div>
+</section>
+
+<section class="hero card">
+  <div>
+    <p class="eyebrow">Document Intelligence</p>
+    <h1>Procesa documentos de forma asíncrona y fiable</h1>
+    <p class="muted">
+      Sube un archivo y sigue su estado hasta la extracción de texto.
+      Backend con FastAPI, Celery, PostgreSQL y Redis.
+    </p>
+  </div>
+</section>
+
+<section class="card">
+  <div class="section-head">
+    <h2>Subir documento</h2>
+    <span class="chip">POST /documents</span>
+  </div>
+  <form class="form" action="/documents" method="post" enctype="multipart/form-data">
+    <input class="file-input" type="file" name="file" required />
+    <button class="btn" type="submit">Subir</button>
+  </form>
+</section>
+
+<section class="card">
+  <div class="section-head">
+    <h2>Últimos documentos</h2>
+    <span class="chip">{{ docs|length }} visibles</span>
+  </div>
+
+  {% if docs|length == 0 %}
+    <div class="empty-state">
+      <h3>Sin documentos todavía</h3>
+      <p class="muted">Sube tu primer archivo para iniciar el pipeline.</p>
+    </div>
+  {% else %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Filename</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for d in docs %}
+        <tr>
+          <td class="mono">{{ d.document_id }}</td>
+          <td class="filename">{{ d.filename }}</td>
+          <td>
+            <span class="status status-{{ d.status|lower }}">{{ d.status }}</span>
+          </td>
+          <td class="mono">{{ d.created_at }}</td>
+          <td>
+            <a class="btn btn-small btn-secondary" href="/ui/documents/{{ d.document_id }}">Ver</a>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</section>
+
+{% endblock %}

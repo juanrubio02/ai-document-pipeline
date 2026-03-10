@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="card">
+  <div class="section-head section-head-gap">
+    <div>
+      <p class="eyebrow">Detalle</p>
+      <h1>Documento</h1>
+      <p class="mono">{{ doc.document_id }}</p>
+    </div>
+    <div class="actions">
+      <a class="btn" href="/documents/{{ doc.document_id }}/download">Download</a>
+      <form action="/ui/documents/{{ doc.document_id }}/reprocess" method="post">
+        <button class="btn btn-secondary" type="submit">Reprocess</button>
+      </form>
+    </div>
+  </div>
+
+  {% set msg = request.query_params.get('msg') %}
+  {% if msg == 'requeued' %}
+    <div class="notice">Documento re-encolado correctamente.</div>
+  {% elif msg == 'already_processing' %}
+    <div class="notice">El documento ya estaba en procesamiento.</div>
+  {% endif %}
+
+  <div class="meta-grid">
+    <div class="meta-item"><span class="k">Filename</span><span class="v">{{ doc.filename }}</span></div>
+    <div class="meta-item"><span class="k">Content-Type</span><span class="v">{{ doc.content_type }}</span></div>
+    <div class="meta-item"><span class="k">Status</span><span class="v"><span class="status status-{{ doc.status|lower }}">{{ doc.status }}</span></span></div>
+    <div class="meta-item"><span class="k">Created</span><span class="v mono">{{ doc.created_at }}</span></div>
+    <div class="meta-item"><span class="k">Processed</span><span class="v mono">{{ doc.processed_at }}</span></div>
+  </div>
+
+  {% if doc.error %}
+    <div class="alert">
+      <strong>Error:</strong> {{ doc.error }}
+    </div>
+  {% endif %}
+</section>
+
+<section class="card">
+  <div class="section-head">
+    <h2>Preview de texto</h2>
+    <a class="btn btn-small btn-secondary" href="/documents/{{ doc.document_id }}/text" target="_blank">Abrir API</a>
+  </div>
+
+  {% if doc.status == "FAILED" %}
+    <div class="empty-state">
+      <h3>Procesamiento fallido</h3>
+      <p class="muted">No hay preview disponible. Revisa el error mostrado arriba.</p>
+    </div>
+  {% elif doc.status in ["PENDING", "PROCESSING"] %}
+    <div class="empty-state">
+      <h3>Procesamiento en curso</h3>
+      <p class="muted">Aún no está listo. Refresca en unos segundos.</p>
+    </div>
+  {% else %}
+    {% if not text_preview %}
+      <div class="empty-state">
+        <h3>Sin texto extraído</h3>
+        <p class="muted">El documento terminó, pero no devolvió texto.</p>
+      </div>
+    {% else %}
+      <pre class="pre">{{ text_preview }}</pre>
+    {% endif %}
+  {% endif %}
+</section>
+
+{% endblock %}
