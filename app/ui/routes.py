@@ -7,6 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.documents import reprocess_document_record
+from app.api.search import search_documents_data
 from app.db.session import get_db
 from app.db.models import Document
 
@@ -16,6 +17,7 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/", response_class=HTMLResponse)
 def ui_index(request: Request, db: Session = Depends(get_db)):
+    search_query = request.query_params.get("q", "").strip()
     docs = (
         db.query(Document)
         .order_by(Document.created_at.desc())
@@ -38,12 +40,15 @@ def ui_index(request: Request, db: Session = Depends(get_db)):
 
     total_documents = sum(by_status.values())
     success_rate = (by_status["DONE"] / total_documents) if total_documents else 0.0
+    search_results = search_documents_data(db=db, q=search_query, limit=8) if search_query else None
 
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
             "docs": docs,
+            "search_query": search_query,
+            "search_results": search_results,
             "stats": {
                 "total_documents": total_documents,
                 "by_status": by_status,

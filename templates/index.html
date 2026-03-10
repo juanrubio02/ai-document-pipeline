@@ -3,6 +3,67 @@
 
 <section class="card">
   <div class="section-head">
+    <h2>Semantic Search</h2>
+    <span class="chip">GET /search</span>
+  </div>
+  <form class="form" action="/" method="get">
+    <input
+      class="file-input"
+      type="text"
+      name="q"
+      value="{{ search_query }}"
+      placeholder="Buscar por significado: python backend docker"
+    />
+    <button class="btn" type="submit">Buscar</button>
+  </form>
+  <p class="search-help muted">Busca documentos procesados por similitud semantica usando el indice offline del pipeline.</p>
+</section>
+
+{% if search_results %}
+<section class="card">
+  <div class="section-head">
+    <h2>Search Results</h2>
+    <span class="chip">{{ search_results.count }} resultados</span>
+  </div>
+
+  {% if search_results.count == 0 %}
+    <div class="empty-state">
+      <h3>Sin coincidencias</h3>
+      <p class="muted">No se encontraron documentos relevantes para "{{ search_query }}".</p>
+    </div>
+  {% else %}
+    <div class="search-results">
+      {% for item in search_results["items"] %}
+      <article class="search-result">
+        <div class="section-head section-head-compact">
+          <div>
+            <h3 class="search-title">{{ item.filename }}</h3>
+            <p class="mono">{{ item.document_id }}</p>
+          </div>
+          <span class="chip chip-strong">Score {{ "%.2f"|format(item.score) }}</span>
+        </div>
+
+        <div class="search-meta">
+          <span class="chip">{{ item.document_type or "generic" }}</span>
+          {% if item.keywords %}
+            <span class="chip">{{ item.keywords }}</span>
+          {% endif %}
+        </div>
+
+        <p class="search-summary">{{ item.summary or "Sin resumen disponible." }}</p>
+
+        <div class="actions">
+          <a class="btn btn-small btn-secondary" href="/ui/documents/{{ item.document_id }}">Ver detalle</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+{% endif %}
+
+<section class="card">
+  <div class="section-head">
     <h2>Pipeline Stats</h2>
     <span class="chip">Success {{ "%.1f"|format(stats.success_rate * 100) }}%</span>
   </div>

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from sqlalchemy import String, Text, DateTime
+from sqlalchemy import DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -26,3 +26,14 @@ class Document(Base):
     document_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
     keywords: Mapped[str | None] = mapped_column(Text, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class DocumentEmbedding(Base):
+    __tablename__ = "document_embeddings"
+
+    document_id: Mapped[str] = mapped_column(
+        String(32),
+        ForeignKey("documents.document_id"),
+        primary_key=True,
+    )
+    embedding: Mapped[str] = mapped_column(Text, nullable=False)

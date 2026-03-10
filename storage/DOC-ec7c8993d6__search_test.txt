@@ -1,0 +1,1 @@
+Python backend docker fastapi redis celery postgresql semantic search

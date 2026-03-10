@@ -6,11 +6,12 @@ from datetime import datetime, timezone
 from celery import Celery
 from sqlalchemy.orm import Session
 
+from app.db.models import Document, DocumentEmbedding
 from app.db.session import SessionLocal
-from app.db.models import Document
 from app.services.ai_enrichment import detect_document_type, extract_keywords
 from app.services.ai_summary import generate_summary
 from app.services.extractors import extract_text_from_file
+from app.services.semantic_search import generate_embedding, serialize_embedding
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 
@@ -55,6 +56,7 @@ def process_document(document_id: str) -> None:
         summary: str | None = None
         document_type: str | None = None
         keywords: str | None = None
+        serialized_embedding: str | None = None
         if text:
             try:
                 summary = generate_summary(text)
@@ -69,11 +71,29 @@ def process_document(document_id: str) -> None:
                 # Enrichment must not break the pipeline.
                 document_type = None
                 keywords = None
+            try:
+                serialized_embedding = serialize_embedding(generate_embedding(text))
+            except Exception:
+                # Embedding generation must not break the pipeline.
+                serialized_embedding = None
 
         doc.text = text
         doc.summary = summary
         doc.document_type = document_type
         doc.keywords = keywords
+        embedding_row = db.get(DocumentEmbedding, doc.document_id)
+        if serialized_embedding:
+            if embedding_row:
+                embedding_row.embedding = serialized_embedding
+            else:
+                db.add(
+                    DocumentEmbedding(
+                        document_id=doc.document_id,
+                        embedding=serialized_embedding,
+                    )
+                )
+        elif embedding_row:
+            db.delete(embedding_row)
         doc.status = "DONE"
         doc.processed_at = now_utc_naive()
         db.commit()
